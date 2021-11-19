@@ -1,8 +1,4 @@
----
-title: A simple result type in Golang 1.18
-date: 2021-11-19T05:15:31Z
-description: Some simple test for the new blog system
----
+# A simple result type in Golang 1.18
 
 With the introduction of generics in Go 1.18. One of the pain point I had with Golang has been finanly resolved.
 
