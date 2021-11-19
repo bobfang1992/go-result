@@ -99,13 +99,13 @@ There are some obvious things I want to point out though.
 Further to point 2, another thing to notice is that `Result` is actually a monad, `C++23` recently added monadic operation for `std::optional`, and Hasekll has the following functions in its stdlib since long before this conecpt is popular.
 
 ```haskell
-    return :: a -> Maybe a
-    return x  = Just x
+return :: a -> Maybe a
+return x  = Just x
 
-    (>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
-    (>>=) m g = case m of
-                   Nothing -> Nothing
-                   Just x  -> g x
+(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
+(>>=) m g = case m of
+                Nothing -> Nothing
+                Just x  -> g x
 ```
 
 The nice thing about these two functions, especially for the second function `(>>=)`, is that it allows you to easily combine/chain multiple operations that may or may not yield a result together without taking keep using `if` to check if the result of last operation is `Ok` or not. I am not going to enumerate an example here, but if you are curious you can look at the Hasekll example [here](https://en.wikibooks.org/wiki/Haskell/Understanding_monads/Maybe).
