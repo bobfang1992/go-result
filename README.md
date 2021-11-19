@@ -1,10 +1,14 @@
-# A simple result type in Golang 1.18
+---
+title: A simple result type in Golang 1.18
+date: 2021-11-19T05:15:31Z
+description: Some simple test for the new blog system
+---
 
 With the introduction of generics in Go 1.18. One of the pain point I had with Golang has been finanly resolved.
 
 In my day job, there are a lot of times I need to implement a "map-reduce" style algorithm using goroutines. Some thing like this:
 
-```golang
+```go
 func processing() {
     works := []Work{
         {
@@ -42,13 +46,13 @@ func processing() {
 
 This may looks like all good, but there is a problem. What if one of the sub goroutine failed, what if this line actually return an error?
 
-```golang
+```go
 newData, err := doSomething(work)
 ```
 
 So usually you have two options, one is to simply introduce a seperate error channel, and the next is to introduce a new Result type locally and change the `result` channel here to accept the `Result` type. In this example we can do this:
 
-```golang
+```go
 type Result struct {
     Data ProcessedWork
     Err  error
@@ -60,7 +64,7 @@ I usually opt for the second solution, but having to define this type every time
 
 Luckily we got generics in Go, so we out `Result` type can defined using this feature.
 
-```golang
+```go
 type Result[T any] struct {
 	value T
 	err   error
@@ -71,7 +75,7 @@ Having this type is much better than using ad-hoc `Result` types for each `proce
 
 A number of useful methods can be added to the `Result` type, for example
 
-```golang
+```go
 func (r Result[T]) Ok() bool {
 	return r.err == nil
 }
@@ -108,11 +112,11 @@ return x  = Just x
                 Just x  -> g x
 ```
 
-The nice thing about these two functions, especially for the second function `(>>=)`, is that it allows you to easily combine/chain multiple operations that may or may not yield a result together without taking keep using `if` to check if the result of last operation is `Ok` or not. I am not going to enumerate an example here, but if you are curious you can look at the Hasekll example [here](https://en.wikibooks.org/wiki/Haskell/Understanding_monads/Maybe).
+The nice thing about these two functions, especially for the second function `(>>=)`, is that it allows you to easily combine/chain multiple operations that may or may not yield a result together without the need to keep using `if` to check if the result of last operation is `Ok` or not. I am not going to enumerate an example here, but if you are curious you can look at the Hasekll example [here](https://en.wikibooks.org/wiki/Haskell/Understanding_monads/Maybe).
 
 But Golang is a bit lacking here, at this moment, if everything goes according to the plan, then we wont be able to have another idependent type variable in a generic type's method. So we cannot have something like this:
 
-```golang
+```go
 func (r Result[T]) Then(f func(T) Result[S]) Result[S] { // <-- S is not allowed, we can only use T
 	if r.Ok() {
 		return f(r.value)
@@ -125,7 +129,7 @@ IMO, this limtation quite serverly limited the usefulness of the result type.
 
 Another thing I wish we had is C++ style "partial specialization" in Go's generics. For now the constraints for `Result` is `any`, but I do want to provide a function like this for user:
 
-```golang
+```go
 func (r Result[T]) Eq(v T) bool {
     if r.Ok() {
         return r.value == v
@@ -136,7 +140,7 @@ func (r Result[T]) Eq(v T) bool {
 
 But since `T` is not `comparable` here, the `==` operatior will not work. If Go can provide a way to refine the constraints for some methods of a generic type, then it would be a nice feature. E.g.
 
-```golang
+```go
 // here we refined the T type from any to comparable by providing a more precise constraints in the method receiver type
 // now only Result that holds a T that are in the constraint comparable will have this method enabled.
 func (r Result[T comparable]) Eq(v T) bool {
