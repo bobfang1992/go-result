@@ -2,6 +2,7 @@ package result
 
 import (
 	"errors"
+	"sync"
 	"testing"
 )
 
@@ -138,4 +139,31 @@ func TestResultMonadic(t *testing.T) {
 		t.Error("Result value should be equal to i+1")
 	}
 
+}
+
+func TestREesultPassingThroughChannel(t *testing.T) {
+
+	testCases := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	var wg sync.WaitGroup
+
+	wg.Add(len(testCases))
+
+	resultChannel := make(chan Result[int], len(testCases))
+
+	for _, tc := range testCases {
+		go func(tc int) {
+			defer wg.Done()
+			r := Result[int]{value: tc * 2}
+			resultChannel <- r
+		}(tc)
+	}
+
+	wg.Wait()
+	close(resultChannel)
+
+	for r := range resultChannel {
+		if r.ValueOr(0) != r.value {
+			t.Error("Result value should be equal to i+1")
+		}
+	}
 }
